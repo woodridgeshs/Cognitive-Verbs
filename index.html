@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>Cognitive Verbs Index</title>
+	<meta charset="utf-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=11" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<link href="external/bootstrap.min.css" rel="stylesheet">
+	<link href="external/mdb.min.css" rel="stylesheet">
+	<script type="text/javascript" src="external/jquery.min.js"></script>
+	<script type="text/javascript" src="external/popper.min.js"></script>
+	<script type="text/javascript" src="external/bootstrap.min.js"></script>
+	<script type="text/javascript" src="external/autoabbr.min.js"></script>
+	<script type="text/javascript" src="external/mdb.js"></script>
+	<style>
+		.simple {
+			display: none;
+		}
+	</style>
+</head>
+
+<body>
+	<div class="container">
+		<div class="row">
+			<div class="jumbotron jumbotron-fluid col-12 aqua-gradient">
+				<div class="container">
+					<img src="icon.png" style="width:75px;height:75px;float:right">
+					<h1 class="display-4">Cognitive Verbs</h1>
+					<p class="lead">Woodridge State High School</p>
+					<hr>
+					<p>Select a cognitive verbs to view definitions and links about using that thinking skill</p>
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-12 card blue-gradient">
+				<div class="card-body">
+					<div class="card-title">
+						<h4>What have I been asked to do?</h4>
+					</div>
+					<div id="options" />
+				</div>
+			</div>
+		</div>
+		<div id="modals" />
+
+	</div>
+</body>
+
+<script>
+	var items = [];
+	var verbs = [];
+	var itemCreator;
+
+	$(document).ready(function () {
+		$.ajaxSetup({
+			cache: false
+		});
+		key = GetParameters().verb;
+		if (key != null) {
+			showAVerb(key);
+		}
+	});
+
+
+	$.getJSON("cognitiveVerbsStudents.json", function (data) {
+		counter = 0;
+		items.push(' ');
+		$.each(data, function (key, val) {
+			key = key.trim();
+			counter += 1;
+
+			items.push(
+				"<button type='button' class='btn btn-success'  data-toggle='modal' data-target='#modal" +
+				key.toLowerCase() + "'>" + key + "</button>");
+
+			itemCreator =
+				"<div id=" + key.toLowerCase() + "><button type='button' onclick='toggleSimpleComplex(&quot;" + key.toLowerCase() +
+				"&quot;)' class='toggleType btn btn-info m-2'>Change to a simple definition</button><div><h1>" +
+				key + "</h1><p id=" + key.toLowerCase() + "Definition>" + val[0] + "</p>";
+			if (val.length > 1) {
+				itemCreator += "<h4 id='linkHeading'>Resources</h4>";
+				for (counterForLinks = 1; counterForLinks < val.length; counterForLinks++) {
+					itemCreator +=
+						"<div class='card m-2 p-1 bg-light'><div class='card-body p-0 m-1'></div><span class='linkToHide'>" + val[
+							counterForLinks] + "</span></div>";
+				}
+			}
+			itemCreator += "</div>";
+
+
+			verbs[key.toLowerCase()] = itemCreator;
+			$("#modals").append("<div class='modal fade' id='modal" + key.toLowerCase() +
+				"'><div class='modal-dialog modal-lg'><div class='modal-content winter-neva-gradient'><div class='modal-header'><h4 class='modal-title'>" +
+				key +
+				"</h4><button type='button' class='close' data-dismiss='modal'>&times;</button></div><div class='modal-body'>" +
+				itemCreator +
+				"</div><div class='modal-footer'><button type='button' class='btn btn-danger' data-dismiss='modal'>Close</button></div></div></div></div>"
+			)
+			itemCreator = "";
+
+		});
+
+
+		$("#options").html(items.join(""));
+	});
+
+	function showAVerb(key) {
+		$('#modal' + key.toLowerCase()).modal('show');
+	}
+
+	function toggleSimpleComplex(key) {
+		example = "'#" + key + "Definition > .complex'";
+		$("#" + key + "Definition > .complex").toggle();
+		$("#" + key + "Definition > .simple").toggle();
+
+		if ($("#" + key + " > .toggleType").html() == 'Change to a complex definition') {
+			$("#" + key + " > .toggleType").html('Change to a simple definition');
+		} else {
+			$("#" + key + " > .toggleType").html('Change to a complex definition');
+		}
+	}
+
+	function GetParameters(req) {
+		var params = req ? req.split('?')[1].split('#')[0] : window.location.search.slice(1);
+		var obj = {};
+		if (params) {
+			var kv = params.split('&');
+			for (var i = 0; i < kv.length; i++) {
+				var kvsplit = kv[i].split('=');
+				var k = kvsplit[0];
+				var v = kvsplit[1];	
+                obj[k] = v;
+			}
+		}
+		return obj;
+	}
+</script>
+
+</html>
